@@ -45,22 +45,34 @@
   <section id="servers">
     <h2>// SERVERS</h2>
     <div class="server-grid">
-      <div class="server-card">
-        <div class="server-game">CS2</div>
-        <div class="server-addr">juanveejuan.superfucked.xyz:27015</div>
-        <div class="status online">● ONLINE</div>
-      </div>
-      <div class="server-card">
+      <div class="server-card" data-server="rust">
         <div class="server-game">RUST</div>
         <div class="server-addr">rust.superfucked.xyz:28015</div>
-        <div class="status online">● ONLINE</div>
+        <div class="server-players"></div>
+        <div class="status offline">● CHECKING_</div>
       </div>
-      <div class="server-card">
+      <div class="server-card" data-server="cs2">
+        <div class="server-game">CS2</div>
+        <div class="server-addr">juanveejuan.superfucked.xyz:27015</div>
+        <div class="server-players"></div>
+        <div class="status offline">● CHECKING_</div>
+      </div>
+      <div class="server-card" data-server="minecraft_blockhead">
         <div class="server-game">MINECRAFT</div>
         <div class="server-addr">blockhead.superfucked.xyz:25565</div>
-        <div class="status online">● ONLINE</div>
+        <div class="server-sub">VANILLA</div>
+        <div class="server-players"></div>
+        <div class="status offline">● CHECKING_</div>
+      </div>
+      <div class="server-card" data-server="minecraft_everycraft">
+        <div class="server-game">MINECRAFT</div>
+        <div class="server-addr">everycraft.superfucked.xyz:25566</div>
+        <div class="server-sub">ALL THE MODS 10</div>
+        <div class="server-players"></div>
+        <div class="status offline">● CHECKING_</div>
       </div>
     </div>
+    <p class="server-meta-note">// status updates every 30s</p>
   </section>
 
   <section id="discord">
@@ -72,6 +84,51 @@
   <footer>
     <p>superfucked.xyz &middot; <a href="https://8dotmedia.com">8dot.media</a></p>
   </footer>
+
+  <script>
+    const STATUS_API = 'https://status.superfucked.xyz/api/status';
+
+    function updateCard(serverKey, info) {
+      const card = document.querySelector(`[data-server="${serverKey}"]`);
+      if (!card) return;
+      const statusEl = card.querySelector('.status');
+      const playersEl = card.querySelector('.server-players');
+      if (!statusEl) return;
+      if (info && info.online) {
+        statusEl.textContent = '● ONLINE';
+        statusEl.className = 'status online';
+        if (playersEl) {
+          const count = info.players !== undefined ? info.players : 0;
+          const max = info.max_players || 0;
+          playersEl.textContent = max > 0 ? `${count}/${max} players` : count > 0 ? `${count} players` : '';
+          playersEl.style.color = 'var(--text-dim)';
+          playersEl.style.fontFamily = 'var(--mono)';
+          playersEl.style.fontSize = '0.8rem';
+          playersEl.style.marginBottom = '0.4rem';
+        }
+      } else {
+        statusEl.textContent = '● OFFLINE';
+        statusEl.className = 'status offline';
+        if (playersEl) playersEl.textContent = '';
+      }
+    }
+
+    async function fetchStatus() {
+      try {
+        const res = await fetch(STATUS_API, { signal: AbortSignal.timeout(8000) });
+        if (!res.ok) throw new Error('non-200');
+        const data = await res.json();
+        for (const [key, info] of Object.entries(data)) {
+          updateCard(key, info);
+        }
+      } catch (e) {
+        // API not reachable (CF tunnel not set up) — leave CHECKING_ or last known state
+      }
+    }
+
+    fetchStatus();
+    setInterval(fetchStatus, 30000);
+  </script>
 
 </body>
 </html>
