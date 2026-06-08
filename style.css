@@ -42,6 +42,9 @@ body {
     rgba(0,0,0,0.12) 3px,
     rgba(0,0,0,0.12) 4px
   );
+  /* Promote to its own GPU layer so scroll doesn't trigger full repaints */
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 /* --- Nav --- */
@@ -53,9 +56,10 @@ nav {
   display: flex;
   gap: 2rem;
   padding: 1rem 2rem;
-  background: rgba(0,0,0,0.85);
+  background: rgba(0,0,0,0.92);
   border-bottom: 1px solid var(--red-dim);
-  backdrop-filter: blur(6px);
+  /* backdrop-filter removed — triggers re-composite on every scroll frame */
+  transform: translateZ(0);
 }
 
 nav a {
@@ -86,6 +90,9 @@ header {
   background-position: center top;
   filter: brightness(0.55) saturate(1.2);
   z-index: 0;
+  /* Isolate the filter into its own layer so it doesn't affect scroll compositing */
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 /* dark gradient at bottom to blend into page */
