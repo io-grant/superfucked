@@ -1,0 +1,10 @@
+# Keep repo metadata and tooling out of the served static assets
+.git
+.gitignore
+.assetsignore
+.wrangler
+wrangler.json
+wrangler.jsonc
+wrangler.toml
+.dev.vars*
+.env*
